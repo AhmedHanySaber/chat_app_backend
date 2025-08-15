@@ -1,7 +1,6 @@
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
-
-// Import your typeDefs and resolvers here
+const jwt = require('jsonwebtoken');
 const typeDefs = require('./typeDefs');
 const resolvers = require('./resolvers');
 
@@ -11,9 +10,18 @@ const server = new ApolloServer({
     typeDefs,
     resolvers,
     context: ({ req }) => {
-        // You can add auth context here later
-        return {};
-    }
+        // Check for JWT token in Authorization header
+        const auth = req.headers.authorization || '';
+        let user = null;
+        if (auth.startsWith('Bearer ')) {
+            try {
+                user = jwt.verify(auth.replace('Bearer ', ''), process.env.JWT_SECRET);
+            } catch (e) {
+                // Invalid token
+            }
+        }
+        return { user };
+    },
 });
 
 async function startApolloServer() {
