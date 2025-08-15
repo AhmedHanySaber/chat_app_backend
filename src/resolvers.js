@@ -39,13 +39,11 @@ const resolvers = {
             if (!user) throw new Error('Not authenticated');
             const room = await Room.create({
                 name,
-                createdBy: user.userId,
+                createdBy: user.userId, // <--- must be provided!
                 members: [user.userId],
+                messages: []
             });
-            // Add room to user's rooms
-            await User.findByIdAndUpdate(user.userId, {
-                $push: { rooms: room._id },
-            });
+            await User.findByIdAndUpdate(user.userId, { $push: { rooms: room._id } });
             return room;
         },
 
